@@ -97,3 +97,6 @@ go doc -http=:9000
 
 visit website: http://localhost:9000/
 
+
+##License
+MIT
