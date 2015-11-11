@@ -2,9 +2,9 @@
 simple logger for golang
 
 ##Install
-
+```sh
 go get github.com/zlbbq/go-logger
-
+```
 ---
 
 ##Simple Usage
@@ -90,9 +90,10 @@ func main() {
 ---
 ##Advanced Usage
 See logger documentation
-
+```sh
 go get gitbub.com/zlbbq/go-logger
-go doc -http=:9000
 
+go doc -http=:9000
+```
 visit website: http://localhost:9000/
 
