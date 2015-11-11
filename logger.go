@@ -216,6 +216,7 @@ func (logger *Logger) SetCallStackDepth(depth int) {
 	if(depth > 10) {
 		depth = 10
 	}
+	logger.CallStackDepth = depth
 }
 
 //******************************************************************************************//
