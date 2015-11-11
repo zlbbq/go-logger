@@ -15,8 +15,6 @@ type Level int
 
 //Logger
 type Logger struct {
-	// Logger name
-	Name string
 	// Log level
 	Level Level
 	// Colorful output, different log levels use different text colors
@@ -25,6 +23,8 @@ type Logger struct {
 	Output io.Writer
 	// Find which code, which file and which line number, called log functions
 	CallStackDepth int
+	// Logger name
+	name string
 }
 
 //LogLevel constants
@@ -43,7 +43,7 @@ const (
 //global logger
 //
 // The global logger is named "root" and it is a colorful logger with level DEBUG and log to os.Stdout
-var gLogger = NewLogger(LevelDebug, true, "", nil)
+var gLogger = Get("root")
 var gLoggers = make(map[string]*Logger)
 var gLogFileAndLine = true
 
@@ -114,18 +114,18 @@ func Get(name string) *Logger {
 
 //register a logger instance to logger pool
 func Register(l * Logger)  {
-	gLoggers[l.Name] = l
+	gLoggers[l.name] = l
 }
 
 //create a logger
-func NewLogger(level Level, colorful bool, name string, output io.Writer) *Logger {
+func NewLogger(name string, level Level, colorful bool, output io.Writer) *Logger {
 	if(output == nil) {
 		output = os.Stdout
 	}
 	if(name == "") {
 		name = "root"
 	}
-	ret := &Logger{name, level, colorful, output, defaultCallStackDepth}
+	ret := &Logger{level, colorful, output, defaultCallStackDepth, name}
 	return ret
 }
 
@@ -133,7 +133,7 @@ func NewLogger(level Level, colorful bool, name string, output io.Writer) *Logge
 //
 //simple logger is a colorful logger with level DEBUG and log to os.Stdout
 func NewSimpleLogger(name string) *Logger{
-	return NewLogger(LevelDebug, true, name, nil)
+	return NewLogger(name, LevelDebug, true, nil)
 }
 
 //debug log
@@ -143,6 +143,8 @@ func (logger *Logger) Debug(fmt string, v ...interface{}) {
 	}
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Cyan, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
 	}
 	logger.logText("TRACE:", fmt, v...)
 }
@@ -154,6 +156,8 @@ func (logger *Logger) Info(fmt string, v ...interface{}) {
 	}
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Green, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
 	}
 	logger.logText("INFO:", fmt, v...)
 }
@@ -165,6 +169,8 @@ func (logger *Logger) Warn(fmt string, v ...interface{}) {
 	}
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Yellow, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
 	}
 	logger.logText("***WARN***:", fmt, v...)
 }
@@ -176,6 +182,8 @@ func (logger *Logger) Error(fmt string, v ...interface{}) {
 	}
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Red, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
 	}
 	logger.logText("***ERROR***:", fmt, v...)
 }
@@ -187,6 +195,8 @@ func (logger *Logger) Fatal(fmt string, v ...interface{}) {
 	}
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Red, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
 	}
 	logger.logText("***FATAL***:", fmt, v...)
 }
@@ -217,7 +227,7 @@ func (logger *Logger) logText(levelFlagString, formatString string, v ...interfa
 		}
 	}
 	t := time.Now()
-	s1 := fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d.%03d [%s] %s%s", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond() / 1000000, logger.Name, levelFlagString, caller)
+	s1 := fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d.%03d [%s] %s%s", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond() / 1000000, logger.name, levelFlagString, caller)
 	s2 := fmt.Sprintf(formatString, v...)
 	fmt.Fprintf(logger.Output, "%s%s\n", s1, s2)
 }
