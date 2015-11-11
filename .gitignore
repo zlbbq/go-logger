@@ -2,6 +2,8 @@
 *.o
 *.a
 *.so
+*.imp
+*.idea
 
 # Folders
 _obj
