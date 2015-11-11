@@ -89,7 +89,7 @@ func main() {
 
 ---
 ##Advanced Usage
-See logger documentation
+See logger documentation and samples
 
 go get gitbub.com/zlbbq/go-logger
 go doc -http=:9000
