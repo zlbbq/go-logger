@@ -92,6 +92,7 @@ func main() {
 See logger documentation and samples
 
 go get gitbub.com/zlbbq/go-logger
+
 go doc -http=:9000
 
 visit website: http://localhost:9000/
