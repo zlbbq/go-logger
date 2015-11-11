@@ -66,14 +66,24 @@ func Warn(fmt string, v ...interface{}) {
 	gLogger.Warn(fmt, v...)
 }
 
+//error log detailed
+func ErrorD(fmt string, v ...interface{}) {
+	gLogger.ErrorD(fmt, v...)
+}
+
 //error log
-func Error(fmt string, v ...interface{}) {
-	gLogger.Error(fmt, v...)
+func Error(err error) {
+	gLogger.Error(err)
+}
+
+//fatal error log detailed
+func FatalD(fmt string, v ...interface{}) {
+	gLogger.FatalD(fmt, v...)
 }
 
 //fatal error log
-func Fatal(fmt string, v ...interface{}) {
-	gLogger.Fatal(fmt, v...)
+func Fatal(err error) {
+	gLogger.Fatal(err)
 }
 
 //set log level of the global logger
@@ -179,8 +189,8 @@ func (logger *Logger) Warn(fmt string, v ...interface{}) {
 	logger.logText("***WARN***:", fmt, v...)
 }
 
-//error log
-func (logger *Logger) Error(fmt string, v ...interface{}) {
+//error log detailed
+func (logger *Logger) ErrorD(fmt string, v ...interface{}) {
 	if(logger.Level > LevelError) {
 		return
 	}
@@ -192,8 +202,21 @@ func (logger *Logger) Error(fmt string, v ...interface{}) {
 	logger.logText("***ERROR***:", fmt, v...)
 }
 
-//fatal error log
-func (logger *Logger) Fatal(fmt string, v ...interface{}) {
+//error log, print error directly
+func (logger *Logger) Error(err error) {
+	if(logger.Level > LevelError) {
+		return
+	}
+	if(logger.Colorful == true) {
+		ct.ChangeColor(ct.Red, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
+	}
+	logger.logText("***ERROR***:", err.Error())
+}
+
+//fatal error log detailed
+func (logger *Logger) FatalD(fmt string, v ...interface{}) {
 	if(logger.Level > LevelFatal) {
 		return
 	}
@@ -203,6 +226,19 @@ func (logger *Logger) Fatal(fmt string, v ...interface{}) {
 		ct.ChangeColor(ct.Black, false, ct.None, false)
 	}
 	logger.logText("***FATAL***:", fmt, v...)
+}
+
+//error log, print fatal error directly
+func (logger *Logger) Fatal(err error) {
+	if(logger.Level > LevelError) {
+		return
+	}
+	if(logger.Colorful == true) {
+		ct.ChangeColor(ct.Red, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
+	}
+	logger.logText("***FATAL***:", err.Error())
 }
 
 //set caller depth, this is used to print the file name and line number where calling log function
