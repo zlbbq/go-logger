@@ -6,6 +6,7 @@ import (
 	"time"
 	"io"
 	"os"
+	"runtime"
 )
 
 //LogLevel
@@ -17,6 +18,7 @@ type Logger struct {
 	Level Level
 	Colorful bool
 	Output io.Writer
+	CallStackDepth int
 }
 
 //LogLevel constants
@@ -28,11 +30,16 @@ const (
 	LevelFatal
 )
 
+const (
+	defaultCallStackDepth = 2
+)
+
 //global logger
 //
 // The global logger is named "root" and it is a colorful logger with level DEBUG and log to os.Stdout
 var gLogger = NewLogger(LevelDebug, true, "", nil)
 var gLoggers = make(map[string]*Logger)
+var gLogFileAndLine = true
 
 //debug log
 func Debug(fmt string, v ...interface{}) {
@@ -74,6 +81,18 @@ func SetOutput(output io.Writer) {
 	gLogger.Output = output
 }
 
+//set call stack depth of the global logger
+func SetCallStackDepth(depth int) {
+	gLogger.SetCallStackDepth(depth)
+}
+
+//global switch of file name and line number
+//
+//production applications should turn off file name and line number output to improve performance
+func SetLogFileNameAndLineNumber(b bool) {
+	gLogFileAndLine = b
+}
+
 //get a logger from logger pool, if cooresponding logger is not found, a simple logger is created and registered then return
 //
 //it is recommended that libraries call this function to initialize a library-inner-logger and pass library full name
@@ -87,6 +106,7 @@ func Get(name string) *Logger {
 	return l
 }
 
+//register a logger instance to logger pool
 func Register(l * Logger)  {
 	gLoggers[l.Name] = l
 }
@@ -99,7 +119,7 @@ func NewLogger(level Level, colorful bool, name string, output io.Writer) *Logge
 	if(name == "") {
 		name = "root"
 	}
-	return &Logger{name, level, colorful, output}
+	return &Logger{name, level, colorful, output, defaultCallStackDepth}
 }
 
 //create a named logger
@@ -164,11 +184,33 @@ func (logger *Logger) Fatal(fmt string, v ...interface{}) {
 	logger.logText(logger.Output, "***FATAL***:", fmt, v...)
 }
 
+//set caller depth, this is used to print the file name and line number where calling log function
+//
+//set this value to 0 will cause no file name and line number outputting
+//range of depth will be restricted from 0 to 10
+func (logger *Logger) SetCallStackDepth(depth int) {
+	if(depth < 0) {
+		depth = 0
+	}
+	if(depth > 10) {
+		depth = 10
+	}
+}
+
 //******************************************************************************************//
 //******************************************************************************************//
 func (logger *Logger) logText(output io.Writer, levelFlagString, formatString string, v ...interface{}) {
+	caller := " "
+	if(gLogFileAndLine) {
+		if (logger.CallStackDepth > 0) {
+			_, file, line, ok := runtime.Caller(logger.CallStackDepth)
+			if (ok == true) {
+				caller = fmt.Sprintf(" - %s:%d -", file, line)
+			}
+		}
+	}
 	t := time.Now()
-	fmt.Fprintf(output, "%d-%02d-%02d %02d:%02d:%02d.%03d - [%s]%s ", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond() / 1000000, logger.Name, levelFlagString)
+	fmt.Fprintf(output, "%d-%02d-%02d %02d:%02d:%02d.%03d [%s] %s%s", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond() / 1000000, logger.Name, levelFlagString, caller)
 	fmt.Fprintf(output, formatString, v...)
 	fmt.Fprintln(output)
 }
