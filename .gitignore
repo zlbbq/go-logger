@@ -2,7 +2,7 @@
 *.o
 *.a
 *.so
-*.imp
+*.iml
 *.idea
 
 # Folders
