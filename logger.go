@@ -32,6 +32,7 @@ const (
 //
 // The global logger is named "root" and it is a colorful logger with level DEBUG and log to os.Stdout
 var gLogger = NewLogger(LevelDebug, true, "", nil)
+var gLoggers = make(map[string]*Logger)
 
 //debug log
 func Debug(fmt string, v ...interface{}) {
@@ -71,6 +72,23 @@ func SetColorful(b bool) {
 //set where to write the log text of the global logger
 func SetOutput(output io.Writer) {
 	gLogger.Output = output
+}
+
+//get a logger from logger pool, if cooresponding logger is not found, a simple logger is created and registered then return
+//
+//it is recommended that libraries call this function to initialize a library-inner-logger and pass library full name
+//to the "name" argument
+func Get(name string) *Logger {
+	l := gLoggers[name]
+	if(l == nil) {
+		l = NewSimpleLogger(name)
+		Register(l)
+	}
+	return l
+}
+
+func Register(l * Logger)  {
+	gLoggers[l.Name] = l
 }
 
 //create a logger
