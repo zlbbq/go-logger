@@ -47,6 +47,10 @@ var gLogger = Get("root")
 var gLoggers = make(map[string]*Logger)
 var gLogFileAndLine = true
 
+func init() {
+	SetCallStackDepth(3)
+}
+
 //debug log
 func Debug(fmt string, v ...interface{}) {
 	gLogger.Debug(fmt, v...)
