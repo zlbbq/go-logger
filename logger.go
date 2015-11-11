@@ -1,12 +1,13 @@
 package logger
 
 import (
-	"github.com/daviddengcn/go-colortext"
 	"fmt"
-	"time"
 	"io"
+	"time"
 	"os"
 	"runtime"
+
+	"github.com/daviddengcn/go-colortext"
 )
 
 //LogLevel
@@ -14,10 +15,15 @@ type Level int
 
 //Logger
 type Logger struct {
+	// Logger name
 	Name string
+	// Log level
 	Level Level
+	// Colorful output, different log levels use different text colors
 	Colorful bool
+	// Where to write output stream
 	Output io.Writer
+	// Find which code, which file and which line number, called log functions
 	CallStackDepth int
 }
 
@@ -119,7 +125,8 @@ func NewLogger(level Level, colorful bool, name string, output io.Writer) *Logge
 	if(name == "") {
 		name = "root"
 	}
-	return &Logger{name, level, colorful, output, defaultCallStackDepth}
+	ret := &Logger{name, level, colorful, output, defaultCallStackDepth}
+	return ret
 }
 
 //create a named logger
@@ -137,7 +144,7 @@ func (logger *Logger) Debug(fmt string, v ...interface{}) {
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Cyan, false, ct.None, false)
 	}
-	logger.logText(logger.Output, "TRACE:", fmt, v...)
+	logger.logText("TRACE:", fmt, v...)
 }
 
 //info log
@@ -148,7 +155,7 @@ func (logger *Logger) Info(fmt string, v ...interface{}) {
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Green, false, ct.None, false)
 	}
-	logger.logText(logger.Output, "INFO:", fmt, v...)
+	logger.logText("INFO:", fmt, v...)
 }
 
 //warning log
@@ -159,7 +166,7 @@ func (logger *Logger) Warn(fmt string, v ...interface{}) {
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Yellow, false, ct.None, false)
 	}
-	logger.logText(logger.Output, "***WARN***:", fmt, v...)
+	logger.logText("***WARN***:", fmt, v...)
 }
 
 //error log
@@ -170,7 +177,7 @@ func (logger *Logger) Error(fmt string, v ...interface{}) {
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Red, false, ct.None, false)
 	}
-	logger.logText(logger.Output, "***ERROR***:", fmt, v...)
+	logger.logText("***ERROR***:", fmt, v...)
 }
 
 //fatal error log
@@ -181,7 +188,7 @@ func (logger *Logger) Fatal(fmt string, v ...interface{}) {
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Red, false, ct.None, false)
 	}
-	logger.logText(logger.Output, "***FATAL***:", fmt, v...)
+	logger.logText("***FATAL***:", fmt, v...)
 }
 
 //set caller depth, this is used to print the file name and line number where calling log function
@@ -199,7 +206,7 @@ func (logger *Logger) SetCallStackDepth(depth int) {
 
 //******************************************************************************************//
 //******************************************************************************************//
-func (logger *Logger) logText(output io.Writer, levelFlagString, formatString string, v ...interface{}) {
+func (logger *Logger) logText(levelFlagString, formatString string, v ...interface{}) {
 	caller := " "
 	if(gLogFileAndLine) {
 		if (logger.CallStackDepth > 0) {
@@ -210,7 +217,7 @@ func (logger *Logger) logText(output io.Writer, levelFlagString, formatString st
 		}
 	}
 	t := time.Now()
-	fmt.Fprintf(output, "%d-%02d-%02d %02d:%02d:%02d.%03d [%s] %s%s", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond() / 1000000, logger.Name, levelFlagString, caller)
-	fmt.Fprintf(output, formatString, v...)
-	fmt.Fprintln(output)
+	s1 := fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d.%03d [%s] %s%s", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond() / 1000000, logger.Name, levelFlagString, caller)
+	s2 := fmt.Sprintf(formatString, v...)
+	fmt.Fprintf(logger.Output, "%s%s\n", s1, s2)
 }
