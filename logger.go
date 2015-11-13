@@ -86,6 +86,27 @@ func Fatal(err error) {
 	gLogger.Fatal(err)
 }
 
+// Convenient log functions,
+func DebugLog(v interface{}) {
+	gLogger.DebugLog(v)
+}
+
+func InfoLog(v interface{}) {
+	gLogger.InfoLog(v)
+}
+
+func WarningLog(v interface{}) {
+	gLogger.WarningLog(v)
+}
+
+func ErrorLog(v interface{}) {
+	gLogger.ErrorLog(v)
+}
+
+func FatalLog(v interface{}) {
+	gLogger.FatalLog(v)
+}
+
 //set log level of the global logger
 func SetLevel(level Level) {
 	gLogger.Level = level
@@ -217,9 +238,6 @@ func (logger *Logger) Error(err error) {
 
 //fatal error log detailed
 func (logger *Logger) FatalD(fmt string, v ...interface{}) {
-	if(logger.Level > LevelFatal) {
-		return
-	}
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Red, false, ct.None, false)
 	} else {
@@ -230,9 +248,6 @@ func (logger *Logger) FatalD(fmt string, v ...interface{}) {
 
 //error log, print fatal error directly
 func (logger *Logger) Fatal(err error) {
-	if(logger.Level > LevelError) {
-		return
-	}
 	if(logger.Colorful == true) {
 		ct.ChangeColor(ct.Red, false, ct.None, false)
 	} else {
@@ -253,6 +268,64 @@ func (logger *Logger) SetCallStackDepth(depth int) {
 		depth = 10
 	}
 	logger.CallStackDepth = depth
+}
+
+// Convenient log functions,
+func (logger *Logger) DebugLog(v interface{}) {
+	if(logger.Level > LevelDebug) {
+		return
+	}
+	if(logger.Colorful == true) {
+		ct.ChangeColor(ct.Cyan, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
+	}
+	logger.logText("TRACE:", "%+v", v)
+}
+
+func (logger *Logger) InfoLog(v interface{}) {
+	if(logger.Level > LevelInfo) {
+		return
+	}
+	if(logger.Colorful == true) {
+		ct.ChangeColor(ct.Green, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
+	}
+	logger.logText("INFO:", "%+v", v)
+}
+
+func (logger *Logger) WarningLog(v interface{}) {
+	if(logger.Level > LevelWarning) {
+		return
+	}
+	if(logger.Colorful == true) {
+		ct.ChangeColor(ct.Yellow, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
+	}
+	logger.logText("***WARN***:", "%+v", v)
+}
+
+func (logger *Logger) ErrorLog(v interface{}) {
+	if(logger.Level > LevelError) {
+		return
+	}
+	if(logger.Colorful == true) {
+		ct.ChangeColor(ct.Red, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
+	}
+	logger.logText("***ERROR***:", "%+v", v)
+}
+
+func (logger *Logger) FatalLog(v interface{}) {
+	if(logger.Colorful == true) {
+		ct.ChangeColor(ct.Red, false, ct.None, false)
+	} else {
+		ct.ChangeColor(ct.Black, false, ct.None, false)
+	}
+	logger.logText("***FATAL***:", "%+v", v)
 }
 
 //******************************************************************************************//
