@@ -336,7 +336,7 @@ func (logger *Logger) logText(levelFlagString, formatString string, v ...interfa
 		if (logger.CallStackDepth > 0) {
 			_, file, line, ok := runtime.Caller(logger.CallStackDepth)
 			if (ok == true) {
-				caller = fmt.Sprintf(" - %s:%d -", file, line)
+				caller = fmt.Sprintf(" - %s:%d - ", file, line)
 			}
 		}
 	}
